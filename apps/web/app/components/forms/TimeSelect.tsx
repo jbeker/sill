@@ -34,8 +34,10 @@ function localHourToUtc(localHour: number): string {
 }
 
 export function utcToLocalHour(utcTime: string): number {
-	const utcDate = new Date(`2000-01-01T${utcTime}Z`);
-	return utcDate.getHours();
+	const today = new Date();
+	const [hours, minutes] = utcTime.split(":").map(Number);
+	today.setUTCHours(hours, minutes, 0, 0);
+	return today.getHours();
 }
 
 export function formatUtcTimeAsLocal(utcTime: string): string {
