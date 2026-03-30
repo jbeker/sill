@@ -8,6 +8,7 @@ type AuthMode = "login" | "signup" | "connect";
 interface BlueskyAuthFormProps {
 	mode: AuthMode;
 	searchParams: URLSearchParams;
+	inviteCode?: string;
 }
 
 const modeLabels: Record<AuthMode, { button: string }> = {
@@ -22,13 +23,14 @@ const modeLabels: Record<AuthMode, { button: string }> = {
 	},
 };
 
-const BlueskyAuthForm = ({ mode, searchParams }: BlueskyAuthFormProps) => {
+const BlueskyAuthForm = ({ mode, searchParams, inviteCode }: BlueskyAuthFormProps) => {
 	const { button } = modeLabels[mode];
 	const isConnect = mode === "connect";
 
 	return (
 		<Form action="/bluesky/auth" method="GET">
 			{mode !== "connect" && <input type="hidden" name="mode" value={mode} />}
+			{inviteCode && <input type="hidden" name="inviteCode" value={inviteCode} />}
 			<Box mb={isConnect ? "0" : "4"}>
 				<Text
 					as="label"
@@ -120,6 +122,17 @@ const BlueskyAuthForm = ({ mode, searchParams }: BlueskyAuthFormProps) => {
 					</Callout.Icon>
 					<Callout.Text>
 						This Bluesky account is already linked to another user.
+					</Callout.Text>
+				</Callout.Root>
+			)}
+			{searchParams.get("error") === "invite_code" && (
+				<Callout.Root mt="4" mb="4" color="red">
+					<Callout.Icon>
+						<CircleAlert width="18" height="18" />
+					</Callout.Icon>
+					<Callout.Text>
+						Invalid or missing invite code. Please enter a valid invite code and
+						try again.
 					</Callout.Text>
 				</Callout.Root>
 			)}

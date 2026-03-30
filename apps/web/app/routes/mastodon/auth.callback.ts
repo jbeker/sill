@@ -49,6 +49,7 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
 	const origin = session.get("mastodonOrigin") as string | undefined;
 	const isMobile = session.get("mobile") === true;
 	const apiSessionId = session.get("apiSessionId") as string | undefined;
+	const inviteCode = session.get("inviteCode") as string | undefined;
 	const code = url.searchParams.get("code");
 
 	// Determine where to redirect on error based on mode and origin
@@ -79,6 +80,7 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
 			code,
 			instance,
 			mode,
+			inviteCode,
 		});
 		const data = await response.json();
 
@@ -100,6 +102,7 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
 				session.unset("mastodonOrigin");
 				session.unset("instance");
 				session.unset("apiSessionId");
+				session.unset("inviteCode");
 				const headers = new Headers();
 				headers.append(
 					"Set-Cookie",

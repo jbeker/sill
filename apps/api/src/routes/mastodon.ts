@@ -25,6 +25,7 @@ const CallbackSchema = z.object({
   code: z.string().min(1),
   instance: z.string().min(1),
   mode: z.enum(["login", "signup"]).optional(),
+  inviteCode: z.string().optional(),
 });
 
 /**
@@ -207,7 +208,7 @@ const mastodon = new Hono()
       const userId = await getUserIdFromSession(c.req.raw);
       const isLogin = !userId; // If no userId, this is a login/signup flow
 
-      const { code, instance, mode } = c.req.valid("json");
+      const { code, instance, mode, inviteCode } = c.req.valid("json");
       const isSignup = mode === "signup";
 
       const dbInstance = await db.query.mastodonInstance.findFirst({
@@ -284,6 +285,18 @@ const mastodon = new Hono()
         }
 
         if (!existingAccount) {
+          // New user - validate invite code if required
+          const requiredInviteCode = process.env.INVITE_CODE;
+          if (requiredInviteCode && inviteCode !== requiredInviteCode) {
+            return c.json(
+              {
+                error: "Invalid or missing invite code",
+                code: "invite_code",
+              },
+              403
+            );
+          }
+
           // No existing account - create new user
           const transaction = await db.transaction(async (tx) => {
             // Create user without email

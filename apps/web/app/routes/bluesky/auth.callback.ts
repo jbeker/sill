@@ -48,6 +48,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 	const origin = session.get("blueskyOrigin") as string | undefined;
 	const isMobile = session.get("mobile") === true;
 	const apiSessionId = session.get("apiSessionId") as string | undefined;
+	const inviteCode = session.get("inviteCode") as string | undefined;
 
 	// Helper to build error redirect path based on mode and origin
 	const getErrorRedirectPath = (errorCode: string) => {
@@ -74,6 +75,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 	const callbackData = {
 		searchParams: url.searchParams.toString(),
 		mode: authMode,
+		inviteCode,
 	};
 
 	// For mobile connect flow, inject the stored API session cookie
@@ -104,6 +106,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 				session.unset("blueskyMode");
 				session.unset("blueskyOrigin");
 				session.unset("apiSessionId");
+				session.unset("inviteCode");
 				const headers = new Headers();
 				headers.append(
 					"Set-Cookie",
@@ -138,6 +141,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 			// Web flow: clear mode cookie and forward API session cookie
 			session.unset("blueskyMode");
 			session.unset("blueskyOrigin");
+			session.unset("inviteCode");
 			const clearModeHeaders = new Headers();
 			clearModeHeaders.append(
 				"Set-Cookie",
@@ -182,6 +186,9 @@ export async function loader({ request }: Route.LoaderArgs) {
 			}
 			if (error.message.includes("account_exists")) {
 				return redirect(getErrorRedirectPath("account_exists"));
+			}
+			if (error.message.includes("invite_code")) {
+				return redirect(getErrorRedirectPath("invite_code"));
 			}
 		}
 

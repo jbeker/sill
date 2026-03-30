@@ -38,6 +38,7 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
 		| undefined;
 	const mobile = requestUrl.searchParams.get("mobile") === "1";
 	const mobileCode = requestUrl.searchParams.get("code");
+	const inviteCode = requestUrl.searchParams.get("inviteCode");
 
 	// Extract pathname from referrer, defaulting to settings if not available or just root
 	let origin = "/settings?tabs=connect";
@@ -97,6 +98,10 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
 		} else {
 			session.set("blueskyOrigin", origin);
 			session.unset("blueskyMode");
+		}
+
+		if (inviteCode) {
+			session.set("inviteCode", inviteCode);
 		}
 
 		if (mobile) {

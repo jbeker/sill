@@ -46,10 +46,12 @@ const SignupSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
   name: z.string().min(1, "Name is required"),
+  inviteCode: z.string().optional(),
 });
 
 const SignupInitiateSchema = z.object({
   email: z.string().email("Invalid email address"),
+  inviteCode: z.string().optional(),
 });
 
 const VerifySchema = z.object({
@@ -137,7 +139,18 @@ const auth = new Hono()
   })
   // POST /api/auth/signup
   .post("/signup", zValidator("json", SignupSchema), async (c) => {
-    const { email, password, name } = c.req.valid("json");
+    const { email, password, name, inviteCode } = c.req.valid("json");
+
+    // Validate invite code if required
+    const requiredInviteCode = process.env.INVITE_CODE;
+    if (requiredInviteCode && inviteCode !== requiredInviteCode) {
+      return c.json(
+        {
+          error: "Invalid or missing invite code",
+        },
+        403
+      );
+    }
 
     try {
       const session = await signup({
@@ -234,7 +247,18 @@ const auth = new Hono()
     "/signup/initiate",
     zValidator("json", SignupInitiateSchema),
     async (c) => {
-      const { email } = c.req.valid("json");
+      const { email, inviteCode } = c.req.valid("json");
+
+      // Validate invite code if required
+      const requiredInviteCode = process.env.INVITE_CODE;
+      if (requiredInviteCode && inviteCode !== requiredInviteCode) {
+        return c.json(
+          {
+            error: "Invalid or missing invite code",
+          },
+          403
+        );
+      }
 
       try {
         // Check if user already exists

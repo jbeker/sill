@@ -9,8 +9,9 @@ import {
 	Link as RLink,
 	Separator,
 	Text,
+	TextField,
 } from "@radix-ui/themes";
-import { ChevronDown, ChevronRight, Info } from "lucide-react";
+import { ChevronDown, ChevronRight, Info, Lock } from "lucide-react";
 import { useState } from "react";
 import { Form, Link, data, redirect, useSearchParams } from "react-router";
 import { HoneypotInputs } from "remix-utils/honeypot/react";
@@ -119,6 +120,7 @@ const Login = ({ actionData }: Route.ComponentProps) => {
 	const [searchParams] = useSearchParams();
 	const redirectTo = searchParams.get("redirectTo");
 	const [emailLoginOpen, setEmailLoginOpen] = useState(false);
+	const [inviteCode, setInviteCode] = useState("");
 
 	const [form, fields] = useForm({
 		id: "login-form",
@@ -148,8 +150,35 @@ const Login = ({ actionData }: Route.ComponentProps) => {
 				</Callout.Text>
 			</Callout.Root>
 
+			<Box mb="4">
+				<Text
+					as="label"
+					size="3"
+					weight="bold"
+					mb="1"
+					style={{ display: "block" }}
+				>
+					Invite code
+				</Text>
+				<Text size="1" color="gray" mb="2" style={{ display: "block" }}>
+					Required for new accounts
+				</Text>
+				<TextField.Root
+					type="text"
+					value={inviteCode}
+					onChange={(e) => setInviteCode(e.target.value)}
+					placeholder="Enter invite code"
+					size="3"
+					autoComplete="off"
+				>
+					<TextField.Slot>
+						<Lock size={16} />
+					</TextField.Slot>
+				</TextField.Root>
+			</Box>
+
 			{/* Bluesky Login */}
-			<BlueskyAuthForm mode="login" searchParams={searchParams} />
+			<BlueskyAuthForm mode="login" searchParams={searchParams} inviteCode={inviteCode} />
 
 			<Flex align="center" gap="3" mb="4" mt="4">
 				<Separator style={{ flex: 1 }} />
@@ -160,7 +189,7 @@ const Login = ({ actionData }: Route.ComponentProps) => {
 			</Flex>
 
 			{/* Mastodon Login */}
-			<MastodonAuthForm mode="login" searchParams={searchParams} />
+			<MastodonAuthForm mode="login" searchParams={searchParams} inviteCode={inviteCode} />
 
 			{/* Email/Password Login (Legacy) */}
 			<Collapsible.Root open={emailLoginOpen} onOpenChange={setEmailLoginOpen}>

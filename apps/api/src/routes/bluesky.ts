@@ -196,6 +196,7 @@ const bluesky = new Hono()
 
       const body = await c.req.json();
       const searchParams = new URLSearchParams(body.searchParams);
+      const inviteCode = body.inviteCode as string | undefined;
 
       // Get mode from request body (passed from web app which stored it in session)
       const isSignup = body.mode === "signup";
@@ -239,6 +240,18 @@ const bluesky = new Hono()
           });
 
           if (!existingAccount) {
+            // New user - validate invite code if required
+            const requiredInviteCode = process.env.INVITE_CODE;
+            if (requiredInviteCode && inviteCode !== requiredInviteCode) {
+              return c.json(
+                {
+                  error: "Invalid or missing invite code",
+                  code: "invite_code",
+                },
+                403,
+              );
+            }
+
             // No existing account - create new user
             const transaction = await db.transaction(async (tx) => {
               // Create user without email
@@ -418,6 +431,18 @@ const bluesky = new Hono()
           });
 
           if (!existingAccount) {
+            // New user - validate invite code if required
+            const requiredInviteCode = process.env.INVITE_CODE;
+            if (requiredInviteCode && inviteCode !== requiredInviteCode) {
+              return c.json(
+                {
+                  error: "Invalid or missing invite code",
+                  code: "invite_code",
+                },
+                403,
+              );
+            }
+
             if (isSignup) {
               // Signup flow in retry: Create new user
               const transaction = await db.transaction(async (tx) => {

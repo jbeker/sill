@@ -216,7 +216,7 @@ export async function apiBlueskyAuthStart(
  */
 export async function apiBlueskyAuthCallback(
   request: Request,
-  data: { searchParams: string; mode?: "login" | "signup" },
+  data: { searchParams: string; mode?: "login" | "signup"; inviteCode?: string },
 ) {
   const client = createApiClient(request);
   const response = await client.api.bluesky.auth.callback.$post({
@@ -277,7 +277,7 @@ export async function apiMastodonAuthStart(
  */
 export async function apiMastodonAuthCallback(
   request: Request,
-  data: { code: string; instance: string; mode?: "login" | "signup" },
+  data: { code: string; instance: string; mode?: "login" | "signup"; inviteCode?: string },
 ) {
   const client = createApiClient(request);
   const response = await client.api.mastodon.auth.callback.$post({

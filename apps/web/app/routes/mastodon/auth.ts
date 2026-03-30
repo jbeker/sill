@@ -50,6 +50,7 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
 	const instance = requestUrl.searchParams.get("instance");
 	const modeParam = requestUrl.searchParams.get("mode");
 	const mode = modeParam === "login" || modeParam === "signup" ? modeParam : undefined;
+	const inviteCode = requestUrl.searchParams.get("inviteCode");
 
 	if (!instance) {
 		return null;
@@ -89,6 +90,10 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
 		}
 
 		session.set("mastodonOrigin", referrer);
+
+		if (inviteCode) {
+			session.set("inviteCode", inviteCode);
+		}
 
 		if (mobile) {
 			session.set("mobile", true);
