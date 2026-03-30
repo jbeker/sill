@@ -1,20 +1,28 @@
 import { render } from "@react-email/components";
-import formData from "form-data";
-import Mailgun from "mailgun.js";
+import nodemailer from "nodemailer";
 import type { ReactElement } from "react";
 
-const mailgun = new Mailgun(formData);
-const mg = mailgun.client({
-  username: "api",
-  key: process.env.MAILGUN_API_KEY || "",
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST,
+  port: Number(process.env.SMTP_PORT || 587),
+  secure: process.env.SMTP_SECURE === "true",
+  ...(process.env.SMTP_USER
+    ? {
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS,
+        },
+      }
+    : {}),
 });
 
 /**
- * Sends an email using the Mailgun API
- * @returns Mailgun API response
+ * Sends an email using SMTP
+ * @returns nodemailer send result
  */
 export async function sendEmail({
   react,
+  "o:tag": _tag,
   ...options
 }: {
   to: string;
@@ -24,20 +32,18 @@ export async function sendEmail({
   | { html: string; text: string; react?: never }
   | { react: ReactElement; html?: never; text?: never }
 )) {
-  const from = `Sill <noreply@${process.env.EMAIL_DOMAIN}>`;
+  const from = process.env.EMAIL_FROM || `Sill <noreply@${process.env.EMAIL_DOMAIN}>`;
 
   const email = {
     from,
     ...options,
     ...(react ? await renderReactEmail(react) : null),
-    template: "",
   };
 
-  // feel free to remove this condition once you've set up Mailgun
-  if (!process.env.MAILGUN_API_KEY || !process.env.EMAIL_DOMAIN) {
-    console.error("Email settings not set and we're not in mocks mode.");
+  if (!process.env.SMTP_HOST) {
+    console.error("SMTP settings not configured.");
     console.error(
-      "To send emails, set the MAILGUN_API_KEY and EMAIL_DOMAIN environment variables."
+      "To send emails, set SMTP_HOST (and optionally SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_SECURE) environment variables."
     );
     console.error(
       "Would have sent the following email:",
@@ -50,7 +56,7 @@ export async function sendEmail({
     } as const;
   }
 
-  const resp = await mg.messages.create(process.env.EMAIL_DOMAIN, email);
+  const resp = await transporter.sendMail(email);
   return resp;
 }
 
