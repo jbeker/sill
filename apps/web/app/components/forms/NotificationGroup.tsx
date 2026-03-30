@@ -128,7 +128,7 @@ const NotificationGroup = ({
 						</Text>
 						<TextField.Root
 							readOnly
-							value={`https://sill.social/notifications/${group.id}.rss`}
+							value={`${window.location.origin}/notifications/${group.id}.rss`}
 							name="feedUrl"
 							id="feedUrl"
 							size="3"
@@ -142,7 +142,7 @@ const NotificationGroup = ({
 								}}
 							>
 								<CopyLink
-									url={`https://sill.social/notifications/${group.id}.rss`}
+									url={`${window.location.origin}/notifications/${group.id}.rss`}
 									textPositioning={{
 										position: "absolute",
 										top: "-34px",

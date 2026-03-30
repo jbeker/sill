@@ -72,7 +72,7 @@ function RssDigestSetup({
 	);
 	const isSubmitting = fetcher.state === "submitting";
 
-	const rssUrl = `https://sill.social/digest/${userId}.rss`;
+	const rssUrl = `${window.location.origin}/digest/${userId}.rss`;
 
 	const handleSubmit = () => {
 		if (!time) return;
